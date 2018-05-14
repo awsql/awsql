@@ -3,7 +3,7 @@
     <div>
       <h1>AWS Quick Look</h1>
       <div class="tip">
-        This is serverless application. Your credentials will be stored only in your browser.
+        This is backendless application works directly with AWS APIs. Your credentials will be stored only in your browser.
       </div>
       <el-form :model="loginForm" ref="loginForm">
         <el-form-item label="AWS access key ID"

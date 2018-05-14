@@ -1,6 +1,11 @@
 <template>
   <div>
     <el-table :data="regions" style="width: 100%">
+      <el-table-column type="expand">
+        <template slot-scope="scope">
+          <region-details :code="scope.row.code"/>
+        </template>
+      </el-table-column>
       <el-table-column label="Region">
         <template slot-scope="scope">
           {{scope.row.name}} ({{scope.row.code}})
@@ -8,7 +13,7 @@
       </el-table-column>
       <el-table-column label="Services count">
         <template slot-scope="scope">
-          [ {{scope.row.count}} ]
+          <region-services-count :code="scope.row.code"/>
         </template>
       </el-table-column>
       <el-table-column label="Info">
@@ -25,12 +30,13 @@
 import regions from '../data/regions'
 import RegionLoadingsInfo from './region-loadings-info'
 import RegionErrorsInfo from './region-errors-info'
+import RegionServicesCount from './region-services-count'
+import RegionDetails from './region-details'
 export default {
   computed: {
     regions () {
       return regions.map(region => ({
-        ...region,
-        count: this.$store.getters[`regions/${region.code}/count`]
+        ...region
       }))
     },
     loadings () {
@@ -38,8 +44,15 @@ export default {
     }
   },
   methods: {
-
+    countServices (region) {
+      return this.$store.getters[`regions/${region}/count`]
+    }
   },
-  components: {RegionLoadingsInfo, RegionErrorsInfo}
+  components: {
+    RegionLoadingsInfo,
+    RegionErrorsInfo,
+    RegionServicesCount,
+    RegionDetails
+  }
 }
 </script>
