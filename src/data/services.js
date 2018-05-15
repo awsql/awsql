@@ -11,6 +11,12 @@ const services = [
         name: 'Applications',
         method: 'describeApplications',
         resultPath: 'Applications'
+      },
+      {
+        code: 'environments',
+        name: 'Environments',
+        method: 'describeEnvironments',
+        resultPath: 'Environments'
       }
     ]
   },

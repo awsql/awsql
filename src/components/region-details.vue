@@ -9,6 +9,12 @@
                          :service="sc.service"
                          :collection="sc.collection"
           />
+          <service-data-provider :region="code"
+                                 :service="sc.service"
+                                 :collection="sc.collection"
+          >
+            <span slot-scope="info" v-if="info.loading" class="el-icon-loading"></span>
+          </service-data-provider>
         </td>
       </tr>
     </table>
@@ -18,6 +24,7 @@
 <script>
 import services from '../data/services'
 import ServiceCount from './service-count'
+import ServiceDataProvider from './service-data-provider'
 export default {
   props: ['code'],
   computed: {
@@ -36,7 +43,8 @@ export default {
     }
   },
   components: {
-    ServiceCount
+    ServiceCount,
+    ServiceDataProvider
   }
 }
 </script>
