@@ -1,11 +1,9 @@
 <template>
   <el-popover width="350"
               trigger="hover"
-              :disabled="!items.length"
+              :disabled="disabled"
   >
-    <div v-for="i of items" :key="i">
-      {{i}}
-    </div>
+    <slot></slot>
     <i slot="reference" :class="icon" @click="click"></i>
   </el-popover>
 </template>
@@ -13,8 +11,8 @@
 <script>
 export default {
   props: {
-    items: Array,
-    icon: {}
+    icon: {},
+    disabled: {}
   },
   computed: {
 

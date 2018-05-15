@@ -1,8 +1,12 @@
 <template>
   <icon :icon="icon"
-        :items="items"
+        :disabled="!items.length"
         @click="click"
-  />
+  >
+    <div v-for="i of items" :key="i">
+      {{i}}
+    </div>
+  </icon>
 </template>
 
 <script>

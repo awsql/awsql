@@ -4,7 +4,7 @@
       <tr v-for="sc of services" :key="sc.text">
         <td>{{sc.text}}</td>
 
-        <td>
+        <td width="50px">
           <service-count :region="code"
                          :service="sc.service"
                          :collection="sc.collection"
@@ -15,6 +15,14 @@
           >
             <span slot-scope="info" v-if="info.loading" class="el-icon-loading"></span>
           </service-data-provider>
+          <service-data-provider :region="code"
+                                 :service="sc.service"
+                                 :collection="sc.collection"
+          >
+            <info-icon slot-scope="info" icon="el-icon-warning">
+              <span>{{info.error.toString()}}</span>
+            </info-icon>
+          </service-data-provider>
         </td>
       </tr>
     </table>
@@ -23,6 +31,7 @@
 
 <script>
 import services from '../data/services'
+import InfoIcon from './info-icon'
 import ServiceCount from './service-count'
 import ServiceDataProvider from './service-data-provider'
 export default {
@@ -44,7 +53,8 @@ export default {
   },
   components: {
     ServiceCount,
-    ServiceDataProvider
+    ServiceDataProvider,
+    InfoIcon
   }
 }
 </script>

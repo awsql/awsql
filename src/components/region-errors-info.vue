@@ -1,6 +1,9 @@
 <template>
-  <icon :icon="icon"
-        :items="items" />
+  <icon :icon="icon" :disabled="!items.length">
+    <div v-for="i of items" :key="i">
+      {{i}}
+    </div>
+  </icon>
 </template>
 
 <script>
