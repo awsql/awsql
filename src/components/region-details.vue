@@ -1,10 +1,11 @@
 <template>
   <div>
-    <table width="50%">
+    <table class="table table-hover table-sm mb-0 no-first-border">
+      <tbody>
       <tr v-for="sc of services" :key="sc.text">
         <td>{{sc.text}}</td>
 
-        <td width="50px">
+        <td width="100px">
           <service-count :region="code"
                          :service="sc.service"
                          :collection="sc.collection"
@@ -13,25 +14,27 @@
                                  :service="sc.service"
                                  :collection="sc.collection"
           >
-            <span slot-scope="info" v-if="info.loading" class="el-icon-loading"></span>
+            <span slot-scope="info" v-if="info.loading" class="fa fa-spinner fa-spin"></span>
           </service-data-provider>
           <service-data-provider :region="code"
                                  :service="sc.service"
                                  :collection="sc.collection"
           >
-            <info-icon slot-scope="info" icon="el-icon-warning">
+            <info-icon slot-scope="info" tag="span" icon="exclamation-circle">
               <span>{{info.error.toString()}}</span>
             </info-icon>
           </service-data-provider>
         </td>
       </tr>
+      </tbody>
+
     </table>
   </div>
 </template>
 
 <script>
 import services from '../data/services'
-import InfoIcon from './info-icon'
+import InfoIcon from './popover-icon'
 import ServiceCount from './service-count'
 import ServiceDataProvider from './service-data-provider'
 export default {
@@ -58,3 +61,13 @@ export default {
   }
 }
 </script>
+
+<style lang="less" scoped>
+.no-first-border {
+  tr:first-of-type {
+    td {
+      border: 0;
+    }
+  }
+}
+</style>

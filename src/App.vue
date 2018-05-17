@@ -1,5 +1,5 @@
 <template>
-  <application v-if="$store.state.credentials"/>
+  <application v-if="$store.state.credentials">logged</application>
   <login v-else/>
 </template>
 
