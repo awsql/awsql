@@ -20,6 +20,7 @@
         </b-form-input>
       </b-form-group>
       <b-button type="submit" variant="primary">Submit</b-button>
+      <a href="https://github.com/awsql/awsql" class="btn float-right"><span class="fab fa-github"/> GitHub</a>
     </b-form>
   </div>
 </template>
