@@ -20,7 +20,7 @@
                                  :service="sc.service"
                                  :collection="sc.collection"
           >
-            <info-icon slot-scope="info" tag="span" icon="exclamation-circle">
+            <info-icon slot-scope="info" tag="span" icon="exclamation-circle" class="text-danger">
               <span>{{info.error.toString()}}</span>
             </info-icon>
           </service-data-provider>

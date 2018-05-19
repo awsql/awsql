@@ -1,5 +1,5 @@
 <template>
-  <application v-if="$store.state.credentials">logged</application>
+  <application v-if="$store.state.credentials"/>
   <login v-else/>
 </template>
 
@@ -10,9 +10,3 @@ export default {
   components: {Application, Login}
 }
 </script>
-
-<style>
-body {
-  margin: 0
-}
-</style>

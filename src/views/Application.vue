@@ -23,11 +23,6 @@ import * as keyValue from '../services/keyValue'
 import ByRegions from '../components/by-regions'
 export default {
   name: 'main-page',
-  data () {
-    return {
-      menuIdx: 'logo'
-    }
-  },
   created () {
     this.$store.dispatch('regions/loadAllData')
   },
