@@ -7,6 +7,7 @@ import sum from 'lodash/sum'
 import {regionsCodes} from './data/regions'
 import services, {servicesCodes} from './data/services'
 import {queryAWS, setCredentials} from './services/aws'
+import {collectionsStore} from './services/indexedDB'
 
 Vue.use(Vuex)
 
@@ -121,11 +122,18 @@ const regionsModule = {
         value: true
       })
       try {
-        const result = await queryAWS(region, service, collection)
+        let items
+        const localCollectionItem = await collectionsStore.get(region, service, collection)
+        if (localCollectionItem && localCollectionItem.date && (Date.now() - localCollectionItem.date.getTime()) > 60000) {
+          items = localCollectionItem.items
+        } else {
+          items = await queryAWS(region, service, collection)
+          await collectionsStore.set(region, service, collection, items)
+        }
         context.commit(`${region}/${service}/setCollectionKey`, {
           collection,
           key: 'items',
-          value: result
+          value: items
         })
       } catch (e) {
         console.log('fail', service, region, collection, e)
