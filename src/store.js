@@ -122,14 +122,7 @@ const regionsModule = {
         value: true
       })
       try {
-        let items
-        const localCollectionItem = await collectionsStore.get(region, service, collection)
-        if (localCollectionItem && localCollectionItem.date && (Date.now() - localCollectionItem.date.getTime()) > 60000) {
-          items = localCollectionItem.items
-        } else {
-          items = await queryAWS(region, service, collection)
-          await collectionsStore.set(region, service, collection, items)
-        }
+        const items = await collectionsStore.getCollectionItems(region, service, collection, () => queryAWS(region, service, collection))
         context.commit(`${region}/${service}/setCollectionKey`, {
           collection,
           key: 'items',

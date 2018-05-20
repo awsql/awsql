@@ -1,3 +1,5 @@
+import {queryAWS} from "./aws";
+
 const collectionsStoreName = 'collections'
 
 function onversionchange (event) {
@@ -51,6 +53,18 @@ function createCollectionsStore (name) {
         request.onsuccess = () => resolve(request.result)
         request.onerror = () => reject(request.error)
       })
+    },
+
+    async getCollectionItems (region, service, collection, getItemsFn) {
+      let items
+      const localCollectionItem = await this.get(region, service, collection)
+      if (localCollectionItem && localCollectionItem.date && (Date.now() - localCollectionItem.date.getTime()) < 3600000) {
+        items = localCollectionItem.items
+      } else {
+        items = await getItemsFn()
+        await this.set(region, service, collection, items)
+      }
+      return items
     },
 
     set (region, service, collection, items) {
