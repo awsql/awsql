@@ -65,7 +65,7 @@ function createCollectionsStore (name) {
           date: new Date()
         }
         const request = database.transaction([name], 'readwrite').objectStore(name).put(obj)
-        request.onsuccess = resolve(obj)
+        request.onsuccess = () => resolve(obj)
         request.onerror = () => reject(request.error)
       })
     }
