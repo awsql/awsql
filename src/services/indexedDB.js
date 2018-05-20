@@ -1,5 +1,3 @@
-import {queryAWS} from "./aws";
-
 const collectionsStoreName = 'collections'
 
 function onversionchange (event) {
