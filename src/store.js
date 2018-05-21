@@ -7,9 +7,11 @@ import sum from 'lodash/sum'
 import {regionsCodes} from './data/regions'
 import services, {servicesCodes} from './data/services'
 import {queryAWS, setCredentials} from './services/aws'
-import {collectionsStore} from './services/indexedDB'
+import {createCollectionsStore} from './services/indexedDB'
 
 Vue.use(Vuex)
+
+const collectionsStore = createCollectionsStore(queryAWS)
 
 function makeServiceCollectionModule (collections) {
   return {
@@ -122,7 +124,7 @@ const regionsModule = {
         value: true
       })
       try {
-        const items = await collectionsStore.getCollectionItems(region, service, collection, () => queryAWS(region, service, collection))
+        const items = await collectionsStore.getCollectionItems(region, service, collection)
         context.commit(`${region}/${service}/setCollectionKey`, {
           collection,
           key: 'items',

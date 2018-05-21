@@ -41,25 +41,25 @@ function getInstanceWithPromise (executor) {
   ))
 }
 
-function createCollectionsStore (name) {
+export function createCollectionsStore (getItemsFn) {
   const makeKey = (region, service, collection) => `${region}_${service}_${collection}`
   return {
     get (region, service, collection) {
       const key = makeKey(region, service, collection)
       return getInstanceWithPromise((database, resolve, reject) => {
-        const request = database.transaction(name).objectStore(name).get(key)
+        const request = database.transaction(collectionsStoreName).objectStore(collectionsStoreName).get(key)
         request.onsuccess = () => resolve(request.result)
         request.onerror = () => reject(request.error)
       })
     },
 
-    async getCollectionItems (region, service, collection, getItemsFn) {
+    async getCollectionItems (region, service, collection) {
       let items
       const localCollectionItem = await this.get(region, service, collection)
       if (localCollectionItem && localCollectionItem.date && (Date.now() - localCollectionItem.date.getTime()) < 3600000) {
         items = localCollectionItem.items
       } else {
-        items = await getItemsFn()
+        items = await getItemsFn(region, service, collection)
         await this.set(region, service, collection, items)
       }
       return items
@@ -76,12 +76,10 @@ function createCollectionsStore (name) {
           items,
           date: new Date()
         }
-        const request = database.transaction([name], 'readwrite').objectStore(name).put(obj)
+        const request = database.transaction([collectionsStoreName], 'readwrite').objectStore(collectionsStoreName).put(obj)
         request.onsuccess = () => resolve(obj)
         request.onerror = () => reject(request.error)
       })
     }
   }
 }
-
-export const collectionsStore = createCollectionsStore(collectionsStoreName)
