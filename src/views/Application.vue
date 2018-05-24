@@ -7,6 +7,13 @@
 
       <b-collapse is-nav id="nav_collapse">
         <b-navbar-nav class="ml-auto">
+          <b-nav-item>
+            <span id="queue-length">{{$store.state.pendingLength}} / {{$store.state.queueLength}}</span>
+            <b-popover target="queue-length" triggers="hover focus">
+              <p class="m-0">{{$store.state.pendingLength}} AWS api queries are running</p>
+              <p class="m-0">{{$store.state.queueLength}} AWS api queries are waiting</p>
+            </b-popover>
+          </b-nav-item>
           <b-nav-item href="https://github.com/awsql/awsql">Github</b-nav-item>
           <b-nav-item href="#" @click="logout">Logout</b-nav-item>
         </b-navbar-nav>

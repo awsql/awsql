@@ -5,6 +5,14 @@ import services from '../data/services'
 
 const queue = new PromiseQueue(10)
 
+export function queueLength () {
+  return queue.queue.length
+}
+
+export function pendingLength () {
+  return queue.pendingPromises
+}
+
 export function queryAWS (regionCode, serviceCode, collectionCode) {
   return queue.add(async () => {
     const service = services.find(({code}) => code === serviceCode)

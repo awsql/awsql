@@ -6,7 +6,7 @@ import sum from 'lodash/sum'
 
 import {regionsCodes} from './data/regions'
 import services, {servicesCodes} from './data/services'
-import {queryAWS, setCredentials} from './services/aws'
+import {queryAWS, setCredentials, queueLength, pendingLength} from './services/aws'
 import {createCollectionsStore} from './services/indexedDB'
 
 Vue.use(Vuex)
@@ -113,6 +113,7 @@ const regionsModule = {
   ),
   actions: {
     async loadCollectionData (context, payload) {
+      context.commit('updateCounts', 0, {root: true})
       const {
         service,
         region,
@@ -143,6 +144,7 @@ const regionsModule = {
         key: 'loading',
         value: false
       })
+      context.commit('updateCounts', 0, {root: true})
     },
     loadRegionData ({state, dispatch}, region) {
       for (const service in state[region]) {
@@ -177,12 +179,18 @@ const regionsModule = {
 
 export default new Vuex.Store({
   state: {
+    pendingLength: 0,
+    queueLength: 0,
     credentials: undefined
   },
   mutations: {
     setCredentials (state, credentials) {
       setCredentials(credentials)
       state.credentials = credentials
+    },
+    updateCounts (state) {
+      state.pendingLength = pendingLength()
+      state.queueLength = queueLength()
     }
   },
   actions: {},
