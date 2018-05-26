@@ -7,7 +7,7 @@ export default {
   props: ['code'],
   computed: {
     count () {
-      return this.$store.getters[`regions/${this.code}/count`]
+      return this.$store.getters.regionCount(this.code)
     }
   }
 }

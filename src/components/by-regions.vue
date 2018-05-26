@@ -34,9 +34,6 @@ export default {
       return regions.map(region => ({
         ...region
       }))
-    },
-    loadings () {
-      return this.$store.getters['regions/loadings']
     }
   },
   methods: {

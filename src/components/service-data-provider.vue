@@ -17,7 +17,7 @@ export default {
   },
   computed: {
     info () {
-      return this.$store.state.regions[this.region][this.service][this.collection]
+      return this.$store.getters.collItem(this.region, this.service, this.collection)
     }
   }
 }

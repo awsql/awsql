@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import zipObject from 'lodash/zipObject'
-import flatten from 'lodash/flatten'
+import flattenDeep from 'lodash/flattenDeep'
+import find from 'lodash/find'
 import sum from 'lodash/sum'
 
 import {regionsCodes} from './data/regions'
-import services, {servicesCodes} from './data/services'
+import services from './data/services'
 import {queryAWS, setCredentials, queueLength, pendingLength} from './services/aws'
 import {createCollectionsStore} from './services/indexedDB'
 
@@ -13,175 +13,33 @@ Vue.use(Vuex)
 
 const collectionsStore = createCollectionsStore(queryAWS)
 
-function makeServiceCollectionModule (collections) {
-  return {
-    namespaced: true,
-    state: zipObject(
-      collections.map(c => c.code),
-      collections.map(() => ({
-        loading: false,
-        items: [],
-        error: undefined
-      }))
-    ),
-    getters: {
-      loadings (state) {
-        return Object.keys(state).filter(k => state[k].loading)
-      },
-      errors (state) {
-        return Object.keys(state).filter(k => state[k].error).map(collection => ({
-          collection,
-          error: state[collection].error
-        }))
-      },
-      count (state) {
-        return sum(Object.values(state).map(c => c.items.length))
-      }
-    },
-    mutations: {
-      setCollectionKey (state, {collection, key, value}) {
-        state[collection][key] = value
-      },
-      resetCollection (state, collection) {
-        state[collection] = {
-          loading: false,
-          items: [],
-          error: undefined
-        }
-      }
-    }
-  }
-}
-
-function makeRegionModule () {
-  return {
-    namespaced: true,
-    modules: zipObject(
-      servicesCodes,
-      services.map(({collections}) => makeServiceCollectionModule(collections))
-    ),
-    getters: {
-      loadings (state, getters) {
-        return flatten(Object.keys(state).map(service => {
-          return getters[`${service}/loadings`].map(collection => ({
-            service,
-            collection
-          }))
-        }))
-      },
-      errors (state, getters) {
-        return flatten(Object.keys(state).map(service => {
-          return getters[`${service}/errors`].map(errInfo => ({
-            ...errInfo,
-            service
-          }))
-        }))
-      },
-      count (state, getters) {
-        return sum(Object.keys(state).map(service => getters[`${service}/count`]))
-      }
-    }
-  }
-}
-
-const regionsModule = {
-  namespaced: true,
-  getters: {
-    loadings (state, getters) {
-      return flatten(Object.keys(state).map(region => {
-        return getters[`${region}/loadings`].map(loadingInfo => ({
-          ...loadingInfo,
-          region
-        }))
-      }))
-    },
-    errors (state, getters) {
-      return flatten(Object.keys(state).map(region => {
-        return getters[`${region}/errors`].map(errInfo => ({
-          ...errInfo,
-          region
-        }))
-      }))
-    },
-    count (state, getters) {
-      return sum(Object.keys(state).map(region => getters[`${region}/count`]))
-    }
-  },
-  modules: zipObject(
-    regionsCodes,
-    regionsCodes.map(makeRegionModule)
-  ),
-  actions: {
-    async loadCollectionData (context, payload) {
-      context.commit('updateCounts', 0, {root: true})
-      const {
-        service,
-        region,
-        collection
-      } = payload
-      context.commit(`${region}/${service}/setCollectionKey`, {
-        collection,
-        key: 'loading',
-        value: true
-      })
-      try {
-        const items = await collectionsStore.getCollectionItems(region, service, collection)
-        context.commit(`${region}/${service}/setCollectionKey`, {
-          collection,
-          key: 'items',
-          value: items
-        })
-      } catch (e) {
-        console.log('fail', service, region, collection, e)
-        context.commit(`${region}/${service}/setCollectionKey`, {
-          collection,
-          key: 'error',
-          value: e
-        })
-      }
-      context.commit(`${region}/${service}/setCollectionKey`, {
-        collection,
-        key: 'loading',
-        value: false
-      })
-      context.commit('updateCounts', 0, {root: true})
-    },
-    loadRegionData ({state, dispatch}, region) {
-      for (const service in state[region]) {
-        for (const collection in state[region][service]) {
-          dispatch('loadCollectionData', {
-            region,
-            service,
-            collection
-          })
-        }
-      }
-    },
-    loadAllData ({state, dispatch}) {
-      for (const region in state) {
-        dispatch('loadRegionData', region)
-      }
-    },
-    resetRegionData ({state, commit}, region) {
-      for (const service in state[region]) {
-        for (const collection in state[region][service]) {
-          commit(`${region}/${service}/resetCollection`, collection)
-        }
-      }
-    },
-    resetAllData ({state, dispatch}) {
-      for (const region in state) {
-        dispatch('resetRegionData', region)
-      }
-    }
-  }
-}
-
 export default new Vuex.Store({
   state: {
     pendingLength: 0,
     queueLength: 0,
-    credentials: undefined
+    credentials: undefined,
+    collections: flattenDeep(regionsCodes.map(regionCode => services.map(service => service.collections.map(collection => ({
+      region: regionCode,
+      service: service.code,
+      collection: collection.code,
+      items: [],
+      loading: false,
+      error: undefined
+    })))))
+  },
+  getters: {
+    collItem: state => (region, service, collection) => {
+      return find(state.collections, {region, service, collection})
+    },
+    regionLoadings: state => region => {
+      return state.collections.filter(c => c.region === region && c.loading)
+    },
+    regionErrors: state => region => {
+      return state.collections.filter(c => c.region === region && c.error)
+    },
+    regionCount: state => region => {
+      return sum(state.collections.filter(c => c.region === region).map(c => c.items.length))
+    }
   },
   mutations: {
     setCredentials (state, credentials) {
@@ -191,10 +49,66 @@ export default new Vuex.Store({
     updateCounts (state) {
       state.pendingLength = pendingLength()
       state.queueLength = queueLength()
+    },
+    setCollKey (state, {region, service, collection, key, value}) {
+      const coll = find(state.collections, {region, service, collection})
+      coll[key] = value
+    },
+    resetColl (state, {region, service, collection}) {
+      const coll = find(state.collections, {region, service, collection})
+      Object.assign(coll, {
+        items: [],
+        loading: false,
+        error: undefined
+      })
     }
   },
-  actions: {},
-  modules: {
-    regions: regionsModule
-  }
+  actions: {
+    async loadCollData (context, {service, region, collection}) {
+      context.commit('updateCounts')
+      context.commit('setCollKey', {region, service, collection, key: 'loading', value: true})
+      try {
+        const items = await collectionsStore.getCollectionItems(region, service, collection)
+        context.commit('setCollKey', {region, service, collection, key: 'items', value: items})
+      } catch (e) {
+        console.log('fail', service, region, collection, e)
+        context.commit('setCollKey', {region, service, collection, key: 'error', value: e})
+      }
+      context.commit('setCollKey', {region, service, collection, key: 'loading', value: false})
+      context.commit('updateCounts')
+    },
+    loadRegionData ({state, dispatch}, regionCode) {
+      for (const service of services) {
+        for (const collection of service.collections) {
+          dispatch('loadCollData', {
+            region: regionCode,
+            service: service.code,
+            collection: collection.code
+          })
+        }
+      }
+    },
+    loadAllData ({state, dispatch}) {
+      for (const region of regionsCodes) {
+        dispatch('loadRegionData', region)
+      }
+    },
+    resetRegionData ({state, commit}, regionCode) {
+      for (const service of services) {
+        for (const collection of service.collections) {
+          commit('resetColl', {
+            region: regionCode,
+            service: service.code,
+            collection: collection.code
+          })
+        }
+      }
+    },
+    resetAllData ({state, dispatch}) {
+      for (const region of regionsCodes) {
+        dispatch('resetRegionData', region)
+      }
+    }
+  },
+  modules: {}
 })

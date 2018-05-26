@@ -18,7 +18,7 @@ export default {
   props: ['code'],
   computed: {
     items () {
-      return this.$store.getters[`regions/${this.code}/loadings`].map(l => {
+      return this.$store.getters.regionLoadings(this.code).map(l => {
         const service = keyedServices[l.service].name
         const collection = keyedServices[l.service].collections[l.collection].name
         return `Loading ${service} ${collection}`
@@ -31,8 +31,8 @@ export default {
   methods: {
     click () {
       if (!this.items.length) {
-        this.$store.dispatch('regions/resetRegionData', this.code)
-        this.$store.dispatch('regions/loadRegionData', this.code)
+        this.$store.dispatch('resetRegionData', this.code)
+        this.$store.dispatch('loadRegionData', this.code)
       }
     }
   },

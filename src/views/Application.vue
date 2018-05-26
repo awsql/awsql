@@ -31,7 +31,7 @@ import ByRegions from '../components/by-regions'
 export default {
   name: 'main-page',
   created () {
-    this.$store.dispatch('regions/loadAllData')
+    this.$store.dispatch('loadAllData')
   },
   methods: {
     logout (evt) {

@@ -16,7 +16,7 @@ export default {
   props: ['code'],
   computed: {
     items () {
-      return this.$store.getters[`regions/${this.code}/errors`].map(l => {
+      return this.$store.getters.regionErrors(this.code).map(l => {
         const service = keyedServices[l.service].name
         const collection = keyedServices[l.service].collections[l.collection].name
         return `${service} ${collection}: ${l.error}`
