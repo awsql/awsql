@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import flattenDeep from 'lodash/flattenDeep'
 import find from 'lodash/find'
 import sum from 'lodash/sum'
+import groupBy from 'lodash/groupBy'
 
 import {regionsCodes} from './data/regions'
 import services from './data/services'
@@ -28,17 +29,18 @@ export default new Vuex.Store({
     })))))
   },
   getters: {
+    collsByRegion: state => groupBy(state.collections, 'region'),
     collItem: state => (region, service, collection) => {
       return find(state.collections, {region, service, collection})
     },
-    regionLoadings: state => region => {
-      return state.collections.filter(c => c.region === region && c.loading)
+    regionLoadings: (state, {collsByRegion}) => region => {
+      return collsByRegion[region].filter(c => c.loading)
     },
-    regionErrors: state => region => {
-      return state.collections.filter(c => c.region === region && c.error)
+    regionErrors: (state, {collsByRegion}) => region => {
+      return collsByRegion[region].filter(c => c.error)
     },
-    regionCount: state => region => {
-      return sum(state.collections.filter(c => c.region === region).map(c => c.items.length))
+    regionCount: (state, {collsByRegion}) => region => {
+      return sum(collsByRegion[region].map(c => c.items.length))
     }
   },
   mutations: {
