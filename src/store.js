@@ -30,18 +30,10 @@ export default new Vuex.Store({
   },
   getters: {
     collsByRegion: state => groupBy(state.collections, 'region'),
-    collItem: state => (region, service, collection) => {
-      return find(state.collections, {region, service, collection})
-    },
-    regionLoadings: (state, {collsByRegion}) => region => {
-      return collsByRegion[region].filter(c => c.loading)
-    },
-    regionErrors: (state, {collsByRegion}) => region => {
-      return collsByRegion[region].filter(c => c.error)
-    },
-    regionCount: (state, {collsByRegion}) => region => {
-      return sum(collsByRegion[region].map(c => c.items.length))
-    }
+    collItem: state => (region, service, collection) => find(state.collections, {region, service, collection}),
+    regionLoadings: (state, {collsByRegion}) => region => collsByRegion[region].filter(c => c.loading),
+    regionErrors: (state, {collsByRegion}) => region => collsByRegion[region].filter(c => c.error),
+    regionCount: (state, {collsByRegion}) => region => sum(collsByRegion[region].map(c => c.items.length))
   },
   mutations: {
     setCredentials (state, credentials) {

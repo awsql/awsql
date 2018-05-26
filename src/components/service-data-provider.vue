@@ -6,7 +6,6 @@
 
 <script>
 export default {
-  // props: ['region', 'service', 'collection'],
   props: {
     tagName: {
       default: 'span'
