@@ -44,31 +44,23 @@ export default new Vuex.Store({
       state.pendingLength = pendingLength()
       state.queueLength = queueLength()
     },
-    setCollKey (state, {region, service, collection, key, value}) {
+    updateColl (state, {region, service, collection, ...update}) {
       const coll = find(state.collections, {region, service, collection})
-      coll[key] = value
-    },
-    resetColl (state, {region, service, collection}) {
-      const coll = find(state.collections, {region, service, collection})
-      Object.assign(coll, {
-        items: [],
-        loading: false,
-        error: undefined
-      })
+      Object.assign(coll, update)
     }
   },
   actions: {
     async loadCollData (context, {service, region, collection}) {
       context.commit('updateCounts')
-      context.commit('setCollKey', {region, service, collection, key: 'loading', value: true})
+      context.commit('updateColl', {region, service, collection, loading: true})
       try {
         const items = await collectionsStore.getCollectionItems(region, service, collection)
-        context.commit('setCollKey', {region, service, collection, key: 'items', value: items})
-      } catch (e) {
-        console.log('fail', service, region, collection, e)
-        context.commit('setCollKey', {region, service, collection, key: 'error', value: e})
+        context.commit('updateColl', {region, service, collection, items})
+      } catch (error) {
+        console.log('fail', service, region, collection, error)
+        context.commit('updateColl', {region, service, collection, error})
       }
-      context.commit('setCollKey', {region, service, collection, key: 'loading', value: false})
+      context.commit('updateColl', {region, service, collection, loading: false})
       context.commit('updateCounts')
     },
     loadRegionData ({state, dispatch}, regionCode) {
@@ -90,10 +82,13 @@ export default new Vuex.Store({
     resetRegionData ({state, commit}, regionCode) {
       for (const service of services) {
         for (const collection of service.collections) {
-          commit('resetColl', {
+          commit('updateColl', {
             region: regionCode,
             service: service.code,
-            collection: collection.code
+            collection: collection.code,
+            items: [],
+            loading: false,
+            error: undefined
           })
         }
       }
