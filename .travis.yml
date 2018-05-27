@@ -15,7 +15,7 @@ deploy:
   committer-from-gh: true
   skip-cleanup: true
   keep-history: true
-  local-dir: build
+  local-dir: dist
   repo: awsql/awsql.github.io
   target-branch: master
   on:
